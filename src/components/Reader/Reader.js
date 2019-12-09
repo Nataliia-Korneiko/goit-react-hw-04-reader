@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-globals */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import s from './reader.module.css';
@@ -18,24 +19,29 @@ export default class Reader extends Component {
         text: PropTypes.string,
       }),
     ),
+    history: PropTypes.shape({
+      push: PropTypes.func.isRequired,
+      replace: PropTypes.func.isRequired,
+    }).isRequired,
+    location: PropTypes.shape({
+      search: PropTypes.string.isRequired,
+      pathname: PropTypes.string.isRequired,
+    }).isRequired,
   };
 
   componentDidMount() {
     const { items, location, history } = this.props;
     const page = new URLSearchParams(location.search).get('item');
 
-    if (!page || Number(page) > items.length) {
+    if (!Number(page) || Number(page) <= 0 || Number(page) > items.length) {
       history.replace({
-        pathname: location.pathname,
+        ...location,
         search: `item=1`,
       });
-    }
-
-    // if null replace with history string ?item=1
+    } else history.replace({ ...location });
   }
 
   handleDecrement = () => {
-    // this.setState(prevState => ({ index: prevState.index - 1 }));
     const { location, history } = this.props;
     const page = new URLSearchParams(location.search).get('item');
     history.push({
@@ -45,7 +51,6 @@ export default class Reader extends Component {
   };
 
   handleIncrement = () => {
-    // this.setState(prevState => ({ index: prevState.index + 1 }));
     const { location, history } = this.props;
     const page = new URLSearchParams(location.search).get('item');
     history.push({
@@ -57,16 +62,17 @@ export default class Reader extends Component {
   render() {
     const { items, location } = this.props;
     const page = Number(new URLSearchParams(location.search).get('item'));
-    const index = page === 0 || page > items.length ? 0 : page - 1;
-    console.log('index', index);
-    console.log('page', page);
+    let index;
+    if (!Number(page) || Number(page) <= 0 || Number(page) > items.length) {
+      index = 0;
+    } else {
+      index = page - 1;
+    }
 
     const maxIndex = items.length;
     const currentIndex = index + 1;
     const disabledPrev = index === 0;
     const disabledNext = index === maxIndex - 1;
-
-    // console.log('index', index);
 
     return (
       <div className={s.reader}>
