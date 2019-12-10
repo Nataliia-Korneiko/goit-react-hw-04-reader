@@ -38,7 +38,7 @@ export default class Reader extends Component {
         ...location,
         search: `item=1`,
       });
-    } else history.replace({ ...location });
+    }
   }
 
   handleDecrement = () => {
